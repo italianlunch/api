@@ -1,0 +1,20 @@
+{
+    "rulesDirectory": ["tslint-plugin-prettier"],
+    "rules": {
+        "prettier": [
+            true,
+            {
+                "printWidth": 80,
+                "tabWidth": 4,
+                "useTabs": false,
+                "semi": true,
+                "singleQuote": true,
+                "trailingComma": "es5",
+                "bracketSpacing": true
+            }
+        ],
+        "no-console": [true, "debug", "info", "time", "timeEnd", "trace"],
+        "object-literal-sort-keys": [false]
+    },
+    "extends": ["tslint:latest", "tslint-config-prettier"]
+}
