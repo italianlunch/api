@@ -1,5 +1,12 @@
 import * as Koa from 'koa';
+import * as bodyParser from 'koa-bodyparser';
+import * as KoaCompose from 'koa-compose';
 import * as Router from 'koa-router';
+import * as StellarSdk from 'stellar-sdk';
+
+const convert = require('koa-convert');
+
+import { sendLumens } from './transactions';
 
 class Server {
     public server: Koa;
@@ -9,13 +16,29 @@ class Server {
         this.server = new Koa();
         this.router = new Router();
 
-        this.router.get('/hello', (ctx, next) => {
-            ctx.body = 'world';
-            next();
-        });
+        this.setRoutes(this.router);
 
-        this.server.use(this.router.routes());
-        this.server.use(this.router.allowedMethods());
+        const setServer = async (ctx: Koa.Context, next: () => void) => {
+            StellarSdk.Network.useTestNetwork();
+            ctx.stellar = {
+                server: new StellarSdk.Server(
+                    'https://horizon-testnet.stellar.org'
+                ),
+            };
+            await next();
+        };
+
+        const middleware = KoaCompose([
+            convert(bodyParser()),
+            setServer,
+            this.router.routes(),
+            this.router.allowedMethods(),
+        ]);
+        this.server.use(middleware);
+    }
+
+    public setRoutes(router: Router) {
+        router.post('/send-lumens', sendLumens);
     }
 
     public start() {
